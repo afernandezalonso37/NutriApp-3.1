@@ -1,0 +1,10 @@
+{
+  "appId": "com.nutriapp.v2",
+  "appName": "NutriApp",
+  "webDir": "www",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}
