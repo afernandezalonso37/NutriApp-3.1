@@ -1,0 +1,67 @@
+name: Compilar APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm install @capacitor/core@8 @capacitor/android@8 @capacitor/camera@8 @capgo/capacitor-health@8
+      - run: npm install -D @capacitor/cli@8
+      - run: npx cap add android
+      - run: npx cap sync android
+      - name: Permisos de Android (cámara y Health Connect) y número de versión
+        run: |
+          sed -i -E 's/minSdkVersion = [0-9]+/minSdkVersion = 26/' android/variables.gradle
+          mkdir -p android/app/src/main/assets/www
+          cp www/privacypolicy.html android/app/src/main/assets/privacypolicy.html
+          cp www/privacypolicy.html android/app/src/main/assets/www/privacypolicy.html
+          python3 - <<'PY'
+          p='android/app/src/main/AndroidManifest.xml'
+          s=open(p).read()
+          import os
+          pm=''
+          for q in ('node_modules/@capgo/capacitor-health/android/src/main/AndroidManifest.xml',):
+              if os.path.exists(q): pm=open(q).read()
+          print('--- Manifest del plugin de salud ---'); print(pm or '(no encontrado)')
+          perms=['android.permission.CAMERA','android.permission.health.READ_STEPS','android.permission.health.READ_ACTIVE_CALORIES_BURNED']
+          add=''.join('    <uses-permission android:name="%s" />\n'%x for x in perms if x not in s)
+          allm=s+pm
+          q='' if 'com.google.android.apps.healthdata' in allm else '    <queries>\n        <package android:name="com.google.android.apps.healthdata" />\n    </queries>\n'
+          s=s.replace('</manifest>',add+q+'</manifest>')
+          if 'ACTION_SHOW_PERMISSIONS_RATIONALE' not in allm:
+              s=s.replace('</activity>','        <intent-filter>\n            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />\n        </intent-filter>\n    </activity>',1)
+          if 'VIEW_PERMISSION_USAGE' not in allm:
+              s=s.replace('</application>','    <activity-alias android:name="ViewPermissionUsageActivity" android:exported="true" android:targetActivity=".MainActivity" android:permission="android.permission.START_VIEW_PERMISSION_USAGE">\n        <intent-filter>\n            <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />\n            <category android:name="android.intent.category.HEALTH_PERMISSIONS" />\n        </intent-filter>\n    </activity-alias>\n</application>',1)
+          open(p,'w').write(s)
+          print('--- Manifest final de la app ---'); print(s)
+          PY
+          sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i 's/versionName "1.0"/versionName "3.2.0"/' android/app/build.gradle
+      - name: Firmar con clave propia (si existe)
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > android/nutriapp.keystore
+            printf '\nandroid.injected.signing.store.file=%s\nandroid.injected.signing.store.password=%s\nandroid.injected.signing.key.alias=nutriapp\nandroid.injected.signing.key.password=%s\n' "$PWD/android/nutriapp.keystore" "$KS_PASS" "$KS_PASS" >> android/gradle.properties
+            echo "Firmando con la clave propia"
+          else
+            echo "AVISO: sin clave propia, se usa la de pruebas"
+          fi
+      - name: Compilar
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nutriapp-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
