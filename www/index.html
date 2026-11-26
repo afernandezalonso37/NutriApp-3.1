@@ -105,17 +105,17 @@ nav button[aria-current=true]{background:var(--ac);color:#fff}
 </head>
 <body>
 <main>
-<div class="brand"><div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-14 14z"/><path d="M5 19c3-5 6-8 10-10"/></svg></div><div><h1>NutriApp</h1><span class="by">by Antonio Fernández · v3.2.0</span></div></div>
+<div class="brand"><div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-14 14z"/><path d="M5 19c3-5 6-8 10-10"/></svg></div><div><h1>NutriApp</h1><span class="by">by Antonio Fernández · v3.2.1</span></div></div>
 
 <section id="v-perfil" hidden>
-<h2>Cuéntanos sobre ti</h2><p class="sub">Con tus datos y tu objetivo calculamos tus metas diarias.</p>
+<h2>Cuéntanos sobre ti</h2><p class="sub" id="psub">Con tus datos y tu objetivo calculamos tus metas diarias.</p>
 <div class="panel">
  <div class="lbl">Sexo</div>
  <div class="seg"><label><input type="radio" name="sex" value="m" checked><span>Hombre</span></label><label><input type="radio" name="sex" value="f"><span>Mujer</span></label></div>
  <div class="row">
-  <div><label class="f" for="age">Edad</label><input id="age" type="number" inputmode="numeric" value="30"></div>
-  <div><label class="f" for="h">Altura (cm)</label><input id="h" type="number" inputmode="numeric" value="175"></div>
-  <div><label class="f" for="w">Peso (kg)</label><input id="w" type="number" inputmode="decimal" value="75"></div>
+  <div><label class="f" for="age">Edad</label><input id="age" type="number" inputmode="numeric" value="50"></div>
+  <div><label class="f" for="h">Altura (cm)</label><input id="h" type="number" inputmode="numeric" value="188"></div>
+  <div><label class="f" for="w">Peso (kg)</label><input id="w" type="number" inputmode="decimal" value="91"></div>
  </div>
  <div class="lbl">Tu día a día, sin contar el ejercicio que apuntes</div>
  <div class="seg col" style="margin:0">
@@ -160,7 +160,7 @@ const FOODS=[['Pechuga de pollo',165,31,0,3.6,1],['Huevo',155,13,1.1,11,3.3],['A
 const MEALS=[['b','Desayuno'],['l','Almuerzo'],['d','Cena'],['s','Snacks']];
 const EX=[['Fuerza',5,1],['Caminar',3.5,0],['Correr',9.8,0],['Ciclismo',7.5,0],['Natación',7,0],['HIIT',8,0],['Deporte de equipo',7,0],['Yoga o pilates',2.5,0]];
 const GOALS={lose:{n:'Adelgazar',d:'Déficit moderado, proteína alta y grasas malas al mínimo',f:.85,p:2.2,fat:.25,gm:.07,t:'#0EA5E9',i:'<path d="M3 7l6 6 4-4 8 8M21 11v6h-6"/>'},keep:{n:'Mantenerse',d:'Calorías de mantenimiento equilibradas',f:1,p:1.6,fat:.28,gm:.10,t:'#10B981',i:'<path d="M5 9h14M5 15h14"/>'},fatten:{n:'Engordar',d:'Superávit controlado y equilibrado',f:1.15,p:1.6,fat:.30,gm:.10,t:'#F59E0B',i:'<path d="M3 17l6-6 4 4 8-8M21 13V7h-6"/>'},muscle:{n:'Aumentar músculo',d:'Superávit ligero, mucha proteína e hidratos',f:1.10,p:2.0,fat:.25,gm:.08,t:'#6366F1',i:'<path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/>'}};
-const DEF={sex:'m',age:30,h:175,w:75,act:1.375,goal:'keep'};
+const DEF={sex:'m',age:50,h:188,w:91,act:1.375,goal:'keep'};
 const sv=(p,s=22)=>'<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';
 const IC={b:sv('<path d="M5 9h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/><path d="M16 10h1.5a2 2 0 0 1 0 4H16M8 3v2M12 3v2"/>'),l:sv('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),d:sv('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'),s:sv('<path d="M12 7c-1-2-3-3-5-2-2 1-3 4-2 8 1 4 3 6 5 6 1 0 1.5-.5 2-.5s1 .5 2 .5c2 0 4-2 5-6 1-4 0-7-2-8-2-1-4 0-5 2z"/><path d="M12 7c0-2 1-3 3-4"/>'),dumb:sv('<path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/>'),plus:sv('<path d="M12 5v14M5 12h14"/>'),ok:sv('<path d="M5 12l5 5 9-10"/>',26),warn:sv('<path d="M12 8v5M12 17h.01"/><path d="M10.3 3.9L2.5 17.5A2 2 0 0 0 4.2 20.5h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',26)};
 const COL={b:'#F59E0B',l:'#0EA5E9',d:'#8B5CF6',s:'#EC4899'};
@@ -374,11 +374,10 @@ $('v-hist').addEventListener('change',e=>{if(e.target.name==='per'){per=e.target
 // ---------- navegación ----------
 function show(v){if(!prof)v='perfil';const V={hoy:'v-hoy',historial:'v-hist',perfil:'v-perfil'};Object.entries(V).forEach(([k,id])=>$(id).hidden=k!==v);
  [['hoy','t-hoy'],['historial','t-hist'],['perfil','t-perfil']].forEach(([k,id])=>$(id).setAttribute('aria-current',k===v));
- if(v==='hoy')renderHoy();if(v==='historial')renderHist();if(v==='perfil'){setForm(prof||DEF);prev();$('gk').value=KEY();$('gmod').value=MODEL();iaSt();$('gres').textContent='';$('psave').textContent=prof?'Guardar cambios':'Guardar y empezar'}scrollTo(0,0)}
+ if(v==='hoy')renderHoy();if(v==='historial')renderHist();if(v==='perfil'){setForm(prof||DEF);prev();$('gk').value=KEY();$('gmod').value=MODEL();iaSt();$('gres').textContent='';$('psave').textContent=prof?'Guardar cambios':'Guardar y empezar';$('psub').textContent=prof?'Con tus datos y tu objetivo calculamos tus metas diarias.':'Para abrir Hoy e Historial, revisa tus datos y pulsa «Guardar y empezar» (abajo del todo). Si vienes de otra versión, pega antes tu copia de seguridad en el apartado de abajo.'}scrollTo(0,0)}
 document.querySelector('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b){location.hash=b.dataset.v;show(b.dataset.v)}});
 const route=()=>show(['hoy','historial','perfil'].includes(location.hash.slice(1))?location.hash.slice(1):'hoy');
 window.addEventListener('hashchange',route);route();
 </script>
 </body>
 </html>
-
